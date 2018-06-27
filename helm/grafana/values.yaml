@@ -85,7 +85,7 @@ service:
 ##
 image:
   repository: grafana/grafana
-  tag: 5.0.0
+  tag: 5.1.4
 
 grafanaWatcher:
   repository: quay.io/coreos/grafana-watcher
@@ -133,7 +133,7 @@ ingress:
   ## Labels to be added to the Ingress
   ##
   labels: {}
-  
+
   ## Hostnames.
   ## Must be provided if Ingress is enabled.
   ##
