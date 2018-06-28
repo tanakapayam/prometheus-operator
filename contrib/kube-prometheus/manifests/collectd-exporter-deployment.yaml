@@ -1,0 +1,43 @@
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  labels:
+    app: collectd-exporter
+  name: collectd-exporter
+  namespace: monitoring
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: collectd-exporter
+  template:
+    metadata:
+      labels:
+        app: collectd-exporter
+    spec:
+      containers:
+      - args:
+        - --collectd.listen-address=:25826
+        image: quay.io/prometheus/collectd-exporter:v0.4.0
+        name: collectd-exporter
+        ports:
+        - containerPort: 9103
+          protocol: TCP
+        - containerPort: 25826
+          protocol: UDP
+        resources:
+          limits:
+            cpu: 102m
+            memory: 180Mi
+          requests:
+            cpu: 102m
+            memory: 180Mi
+      restartPolicy: Always
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534
+      tolerations:
+      - key: CriticalAddonsOnly
+        operator: Exists
+      - effect: NoSchedule
+        key: node-role.kubernetes.io/master
