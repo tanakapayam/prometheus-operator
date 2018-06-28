@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    service.beta.kubernetes.io/alicloud-loadbalancer-address-type: intranet
+  name: collectd-exporter-http
+  namespace: monitoring
+spec:
+  ports:
+  - name: http
+    port: 9103
+    targetPort: 9103
+  selector:
+    app: collectd-exporter
+  type: LoadBalancer

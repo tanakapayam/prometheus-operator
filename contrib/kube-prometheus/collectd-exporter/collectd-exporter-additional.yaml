@@ -1,0 +1,8 @@
+- job_name: collectd-exporter
+  scrape_interval: 30s
+  scrape_timeout: 10s
+  metrics_path: /metrics
+  scheme: http
+  static_configs:
+  - targets:
+    - 172.16.0.8:9103
