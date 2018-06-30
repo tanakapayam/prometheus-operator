@@ -1,8 +1,10 @@
 SHELL=/bin/bash -o pipefail
 
-REPO?=quay.io/coreos/prometheus-operator
-REPO_PROMETHEUS_CONFIG_RELOADER?=quay.io/coreos/prometheus-config-reloader
-TAG?=$(shell git rev-parse --short HEAD)
+DOCKER_SERVER?=registry.cn-shanghai.aliyuncs.com
+K8S_PROJECT?=ccs-dev
+REPO?=$(DOCKER_SERVER)/$(K8S_PROJECT)/prometheus-operator
+REPO_PROMETHEUS_CONFIG_RELOADER?=$(DOCKER_SERVER)/$(K8S_PROJECT)/prometheus-config-reloader
+TAG?=$(shell git tag | sort -V | tail -1)
 
 PO_CRDGEN_BINARY:=$(GOPATH)/bin/po-crdgen
 OPENAPI_GEN_BINARY:=$(GOPATH)/bin/openapi-gen
@@ -17,7 +19,50 @@ pkgs = $(shell go list ./... | grep -v /vendor/ | grep -v /test/)
 
 
 .PHONY: all
-all: format generate build test
+all: format generate build test image
+        @echo
+        @echo "$${BOLD}# now we're ready for: $${GREEN}make install$${RESET}"
+        @echo
+
+.PHONY: clean
+clean:
+        rm -f operator prometheus-config-reloader
+        rm -f hack/operator-image hack/prometheus-config-reloader-image
+        rm -fr ./hack/generate/vendor/.tmp
+        @echo
+        docker rmi $(REPO):$(TAG) 2>/dev/null || true
+        @echo
+        docker rmi $(REPO_PROMETHEUS_CONFIG_RELOADER):$(TAG) 2>/dev/null || true
+        @echo
+        @echo "$${BOLD}# now we're ready for: $${GREEN}make$${RESET}"
+        @echo
+
+.PHONY: install-0
+install-0:
+        KUBECONFIG=$(KUBECONFIG) kubectl apply -f contrib/kube-prometheus/manifests/00namespace-namespace.yaml
+        @echo
+        KUBECONFIG=$(KUBECONFIG) kubectl apply -f bundle.yaml
+        KUBECONFIG=$(KUBECONFIG) kubectl --namespace=default delete deployment prometheus-operator
+        @echo
+        KUBECONFIG=$(KUBECONFIG) kubectl apply -f contrib/kube-prometheus/manifests/collectd-exporter-deployment.yaml
+        KUBECONFIG=$(KUBECONFIG) kubectl apply -f contrib/kube-prometheus/manifests/collectd-exporter-service.yaml
+        KUBECONFIG=$(KUBECONFIG) kubectl apply -f contrib/kube-prometheus/manifests/collectd-exporter-http-service.yaml
+
+.PHONY: install-no-grafana
+install-no-grafana:
+        rm -f contrib/kube-prometheus/manifests/grafana-*
+        KUBECONFIG=$(KUBECONFIG) kubectl apply -f contrib/kube-prometheus/manifests
+        git checkout contrib/kube-prometheus/manifests/grafana-*
+
+.PHONY: install
+install:
+        KUBECONFIG=$(KUBECONFIG) kubectl apply -f contrib/kube-prometheus/manifests
+
+.PHONY: uninstall
+uninstall:
+        KUBECONFIG=$(KUBECONFIG) kubectl delete -f contrib/kube-prometheus/manifests/00namespace-namespace.yaml || true
+        @echo
+        KUBECONFIG=$(KUBECONFIG) kubectl delete -f bundle.yaml || true
 
 
 ############
@@ -63,6 +108,7 @@ hack/operator-image: Dockerfile operator
 # was last executed via the last-modification timestamp on the file. See
 # https://www.gnu.org/software/make/manual/make.html#Empty-Targets
 	docker build -t $(REPO):$(TAG) .
+        docker push $(REPO):$(TAG)
 	touch $@
 
 hack/prometheus-config-reloader-image: cmd/prometheus-config-reloader/Dockerfile prometheus-config-reloader
@@ -70,6 +116,7 @@ hack/prometheus-config-reloader-image: cmd/prometheus-config-reloader/Dockerfile
 # was last executed via the last-modification timestamp on the file. See
 # https://www.gnu.org/software/make/manual/make.html#Empty-Targets
 	docker build -t $(REPO_PROMETHEUS_CONFIG_RELOADER):$(TAG) -f cmd/prometheus-config-reloader/Dockerfile .
+        docker push $(REPO_PROMETHEUS_CONFIG_RELOADER):$(TAG)
 	touch $@
 
 
@@ -124,7 +171,7 @@ $(RBAC_MANIFESTS): hack/generate/vendor hack/generate/prometheus-operator-rbac.j
 	hack/generate/build-rbac-prometheus-operator.sh
 
 jsonnet/prometheus-operator/prometheus-operator.libsonnet: VERSION
-	sed -i                                                            \
+        sed -i \
 		"s/prometheusOperator: 'v.*',/prometheusOperator: 'v$(shell cat VERSION)',/" \
 		jsonnet/prometheus-operator/prometheus-operator.libsonnet;
 
@@ -166,7 +213,7 @@ shellcheck:
 ###########
 
 .PHONY: test
-test: test-unit test-e2e
+test: # test-unit test-e2e
 
 .PHONY: test-unit
 test-unit:
@@ -174,7 +221,7 @@ test-unit:
 
 .PHONY: test-e2e
 test-e2e: NAMESPACE?=po-e2e-$(shell LC_ALL=C tr -dc a-z0-9 < /dev/urandom | head -c 13 ; echo '')
-test-e2e: KUBECONFIG?=$(HOME)/.kube/config
+test-e2e: KUBECONFIG=$(KUBECONFIG)
 test-e2e:
 	go test -timeout 55m -v ./test/e2e/ $(TEST_RUN_ARGS) --kubeconfig=$(KUBECONFIG) --operator-image=$(REPO):$(TAG) --namespace=$(NAMESPACE)
 
