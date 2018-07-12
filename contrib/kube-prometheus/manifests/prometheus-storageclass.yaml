@@ -1,0 +1,9 @@
+---
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: prometheus
+parameters:
+  type: cloud_ssd
+provisioner: alicloud/disk
+reclaimPolicy: Retain
