@@ -18,6 +18,7 @@ spec:
   resources:
     requests:
       memory: 400Mi
+  retention: 1440h
   ruleSelector:
     matchLabels:
       prometheus: k8s
@@ -27,4 +28,11 @@ spec:
     matchExpressions:
     - key: k8s-app
       operator: Exists
+  storage:
+    volumeClaimTemplate:
+      spec:
+        storageClassName: prometheus
+        resources:
+          requests:
+            storage: 50Gi
   version: v2.3.1
