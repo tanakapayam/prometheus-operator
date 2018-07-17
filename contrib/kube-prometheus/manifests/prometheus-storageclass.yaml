@@ -4,6 +4,6 @@ kind: StorageClass
 metadata:
   name: prometheus
 parameters:
-  type: cloud_ssd
-provisioner: alicloud/disk
+  type: pd-ssd
+provisioner: kubernetes.io/gce-pd
 reclaimPolicy: Retain

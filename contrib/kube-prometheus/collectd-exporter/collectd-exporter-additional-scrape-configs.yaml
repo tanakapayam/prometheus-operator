@@ -5,7 +5,7 @@
 #     cat collectd-exporter-additional-scrape-configs.yaml | yq -r '.data["collectd-exporter-additional.yaml"]' | base64 -D
 apiVersion: v1
 data:
-  collectd-exporter-additional.yaml: LSBqb2JfbmFtZTogY29sbGVjdGQtZXhwb3J0ZXIKICBzY3JhcGVfaW50ZXJ2YWw6IDMwcwogIHNjcmFwZV90aW1lb3V0OiAxMHMKICBtZXRyaWNzX3BhdGg6IC9tZXRyaWNzCiAgc2NoZW1lOiBodHRwCiAgc3RhdGljX2NvbmZpZ3M6CiAgLSB0YXJnZXRzOgogICAgLSAxNzIuMTYuMC44OjkxMDMK
+  collectd-exporter-additional.yaml: LSBqb2JfbmFtZTogY29sbGVjdGQtZXhwb3J0ZXIKICBzY3JhcGVfaW50ZXJ2YWw6IDMwcwogIHNjcmFwZV90aW1lb3V0OiAxMHMKICBtZXRyaWNzX3BhdGg6IC9tZXRyaWNzCiAgc2NoZW1lOiBodHRwCiAgc3RhdGljX2NvbmZpZ3M6CiAgLSB0YXJnZXRzOgogICAgLSAxNzIuMjguOC4yODo5MTAzCg==
 kind: Secret
 metadata:
   name: additional-scrape-configs
