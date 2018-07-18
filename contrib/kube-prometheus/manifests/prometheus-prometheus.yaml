@@ -10,10 +10,7 @@ spec:
     name: additional-scrape-configs
     key: collectd-exporter-additional.yaml
   alerting:
-    alertmanagers:
-    - name: alertmanager-main
-      namespace: monitoring
-      port: web
+    alertmanagers: []
   baseImage: quay.io/prometheus/prometheus
   nodeSelector:
     beta.kubernetes.io/os: linux
