@@ -20,49 +20,49 @@ pkgs = $(shell go list ./... | grep -v /vendor/ | grep -v /test/)
 
 .PHONY: all
 all: format generate build test image
-        @echo
-        @echo "$${BOLD}# now we're ready for: $${GREEN}make install$${RESET}"
-        @echo
+	@echo
+	@echo "$${BOLD}# now we're ready for: $${GREEN}make install$${RESET}"
+	@echo
 
 .PHONY: clean
 clean:
-        rm -f operator prometheus-config-reloader
-        rm -f hack/operator-image hack/prometheus-config-reloader-image
-        rm -fr ./hack/generate/vendor/.tmp
-        @echo
-        docker rmi $(REPO):$(TAG) 2>/dev/null || true
-        @echo
-        docker rmi $(REPO_PROMETHEUS_CONFIG_RELOADER):$(TAG) 2>/dev/null || true
-        @echo
-        @echo "$${BOLD}# now we're ready for: $${GREEN}make$${RESET}"
-        @echo
+	rm -f operator prometheus-config-reloader
+	rm -f hack/operator-image hack/prometheus-config-reloader-image
+	rm -fr ./hack/generate/vendor/.tmp
+	@echo
+	docker rmi $(REPO):$(TAG) 2>/dev/null || true
+	@echo
+	docker rmi $(REPO_PROMETHEUS_CONFIG_RELOADER):$(TAG) 2>/dev/null || true
+	@echo
+	@echo "$${BOLD}# now we're ready for: $${GREEN}make$${RESET}"
+	@echo
 
 .PHONY: install-0
 install-0:
-        KUBECONFIG=$(KUBECONFIG) kubectl apply -f contrib/kube-prometheus/manifests/00namespace-namespace.yaml
-        @echo
-        KUBECONFIG=$(KUBECONFIG) kubectl apply -f bundle.yaml
-        KUBECONFIG=$(KUBECONFIG) kubectl --namespace=default delete deployment prometheus-operator
-        @echo
-        KUBECONFIG=$(KUBECONFIG) kubectl apply -f contrib/kube-prometheus/manifests/collectd-exporter-deployment.yaml
-        KUBECONFIG=$(KUBECONFIG) kubectl apply -f contrib/kube-prometheus/manifests/collectd-exporter-service.yaml
-        KUBECONFIG=$(KUBECONFIG) kubectl apply -f contrib/kube-prometheus/manifests/collectd-exporter-http-service.yaml
+	KUBECONFIG=$(KUBECONFIG) kubectl apply -f contrib/kube-prometheus/manifests/00namespace-namespace.yaml
+	@echo
+	KUBECONFIG=$(KUBECONFIG) kubectl apply -f bundle.yaml
+	KUBECONFIG=$(KUBECONFIG) kubectl --namespace=default delete deployment prometheus-operator
+	@echo
+	KUBECONFIG=$(KUBECONFIG) kubectl apply -f contrib/kube-prometheus/manifests/collectd-exporter-deployment.yaml
+	KUBECONFIG=$(KUBECONFIG) kubectl apply -f contrib/kube-prometheus/manifests/collectd-exporter-service.yaml
+	KUBECONFIG=$(KUBECONFIG) kubectl apply -f contrib/kube-prometheus/manifests/collectd-exporter-http-service.yaml
 
 .PHONY: install-no-grafana
 install-no-grafana:
-        rm -f contrib/kube-prometheus/manifests/grafana-*
-        KUBECONFIG=$(KUBECONFIG) kubectl apply -f contrib/kube-prometheus/manifests
-        git checkout contrib/kube-prometheus/manifests/grafana-*
+	rm -f contrib/kube-prometheus/manifests/grafana-*
+	KUBECONFIG=$(KUBECONFIG) kubectl apply -f contrib/kube-prometheus/manifests
+	git checkout contrib/kube-prometheus/manifests/grafana-*
 
 .PHONY: install
 install:
-        KUBECONFIG=$(KUBECONFIG) kubectl apply -f contrib/kube-prometheus/manifests
+	KUBECONFIG=$(KUBECONFIG) kubectl apply -f contrib/kube-prometheus/manifests
 
 .PHONY: uninstall
 uninstall:
-        KUBECONFIG=$(KUBECONFIG) kubectl delete -f contrib/kube-prometheus/manifests/00namespace-namespace.yaml || true
-        @echo
-        KUBECONFIG=$(KUBECONFIG) kubectl delete -f bundle.yaml || true
+	KUBECONFIG=$(KUBECONFIG) kubectl delete -f contrib/kube-prometheus/manifests/00namespace-namespace.yaml || true
+	@echo
+	KUBECONFIG=$(KUBECONFIG) kubectl delete -f bundle.yaml || true
 
 
 ############
@@ -108,7 +108,7 @@ hack/operator-image: Dockerfile operator
 # was last executed via the last-modification timestamp on the file. See
 # https://www.gnu.org/software/make/manual/make.html#Empty-Targets
 	docker build -t $(REPO):$(TAG) .
-        docker push $(REPO):$(TAG)
+	docker push $(REPO):$(TAG)
 	touch $@
 
 hack/prometheus-config-reloader-image: cmd/prometheus-config-reloader/Dockerfile prometheus-config-reloader
@@ -116,7 +116,7 @@ hack/prometheus-config-reloader-image: cmd/prometheus-config-reloader/Dockerfile
 # was last executed via the last-modification timestamp on the file. See
 # https://www.gnu.org/software/make/manual/make.html#Empty-Targets
 	docker build -t $(REPO_PROMETHEUS_CONFIG_RELOADER):$(TAG) -f cmd/prometheus-config-reloader/Dockerfile .
-        docker push $(REPO_PROMETHEUS_CONFIG_RELOADER):$(TAG)
+	docker push $(REPO_PROMETHEUS_CONFIG_RELOADER):$(TAG)
 	touch $@
 
 
@@ -171,7 +171,7 @@ $(RBAC_MANIFESTS): hack/generate/vendor hack/generate/prometheus-operator-rbac.j
 	hack/generate/build-rbac-prometheus-operator.sh
 
 jsonnet/prometheus-operator/prometheus-operator.libsonnet: VERSION
-        sed -i \
+	sed -i \
 		"s/prometheusOperator: 'v.*',/prometheusOperator: 'v$(shell cat VERSION)',/" \
 		jsonnet/prometheus-operator/prometheus-operator.libsonnet;
 
