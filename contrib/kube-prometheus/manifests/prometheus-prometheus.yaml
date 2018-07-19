@@ -6,9 +6,6 @@ metadata:
   name: k8s
   namespace: monitoring
 spec:
-  additionalScrapeConfigs:
-    name: additional-scrape-configs
-    key: collectd-exporter-additional.yaml
   alerting:
     alertmanagers: []
   baseImage: quay.io/prometheus/prometheus

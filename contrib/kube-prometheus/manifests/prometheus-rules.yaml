@@ -274,15 +274,6 @@ spec:
       for: 15m
       labels:
         severity: critical
-    - alert: CollectdExporterDown
-      annotations:
-        message: CollectdExporter has disappeared from Prometheus target discovery.
-        runbook_url: see jeffrey.hart@byton.com
-      expr: |
-        absent(up{job="collectd-exporter"} == 1)
-      for: 1m
-      labels:
-        severity: none
     - alert: KubeAPIDown
       annotations:
         message: KubeAPI has disappeared from Prometheus target discovery.
