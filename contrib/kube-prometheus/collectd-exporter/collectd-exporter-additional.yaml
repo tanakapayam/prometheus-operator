@@ -5,4 +5,4 @@
   scheme: http
   static_configs:
   - targets:
-    - 172.28.8.28:9103
+UPDATE-ME

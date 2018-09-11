@@ -37,8 +37,35 @@ clean:
 	@echo "$${BOLD}# now we're ready for: $${GREEN}make$${RESET}"
 	@echo
 
+.PHONY: prep-gke
+prep-gke:
+	perl -pi -e 's,UPDATE-ME,    cloud.google.com/load-balancer-type: Internal,' contrib/kube-prometheus/manifests/grafana-service.yaml
+	perl -pi -e 's,UPDATE-ME,    cloud.google.com/load-balancer-type: Internal,' contrib/kube-prometheus/manifests/prometheus-service.yaml
+	perl -pi -e 's,UPDATE-ME,  type: pd-ssd\nprovisioner: kubernetes.io/gce-pd,' contrib/kube-prometheus/manifests/prometheus-storageclass.yaml
+
+.PHONY: prep-gke-collectd
+prep-gke-collectd: prep-gke
+	perl -pi -e 's,UPDATE-ME,  collectd-exporter-additional.yaml: LSBqb2JfbmFtZTogY29sbGVjdGQtZXhwb3J0ZXIKICBzY3JhcGVfaW50ZXJ2YWw6IDMwcwogIHNjcmFwZV90aW1lb3V0OiAxMHMKICBtZXRyaWNzX3BhdGg6IC9tZXRyaWNzCiAgc2NoZW1lOiBodHRwCiAgc3RhdGljX2NvbmZpZ3M6CiAgLSB0YXJnZXRzOgogICAgLSAxNzIuMjguOC4yODo5MTAzCg==,' contrib/kube-prometheus/collectd-exporter/collectd-exporter-additional-scrape-configs.yaml
+	perl -pi -e 's,UPDATE-ME,    - 172.28.8.28:9103,' contrib/kube-prometheus/collectd-exporter/collectd-exporter-additional.yaml
+	perl -pi -e 's,UPDATE-ME,    cloud.google.com/load-balancer-type: Internal,' contrib/kube-prometheus/manifests/collectd-exporter-http-service.yaml
+	perl -pi -e 's,UPDATE-ME,    cloud.google.com/load-balancer-type: Internal,' contrib/kube-prometheus/manifests/collectd-exporter-service.yaml
+
+.PHONY: prep-acs
+prep-acs:
+	perl -pi -e 's,UPDATE-ME,    service.beta.kubernetes.io/alicloud-loadbalancer-address-type: intranet,' contrib/kube-prometheus/manifests/grafana-service.yaml
+	perl -pi -e 's,UPDATE-ME,    service.beta.kubernetes.io/alicloud-loadbalancer-address-type: intranet,' contrib/kube-prometheus/manifests/prometheus-service.yaml
+	perl -pi -e 's,UPDATE-ME,  type: cloud_ssd\nprovisioner: alicloud/disk,' contrib/kube-prometheus/manifests/prometheus-storageclass.yaml
+
+.PHONY: prep-acs-collectd
+prep-acs-collectd: prep-acs
+	perl -pi -e 's,UPDATE-ME,  collectd-exporter-additional.yaml: LSBqb2JfbmFtZTogY29sbGVjdGQtZXhwb3J0ZXIKICBzY3JhcGVfaW50ZXJ2YWw6IDMwcwogIHNjcmFwZV90aW1lb3V0OiAxMHMKICBtZXRyaWNzX3BhdGg6IC9tZXRyaWNzCiAgc2NoZW1lOiBodHRwCiAgc3RhdGljX2NvbmZpZ3M6CiAgLSB0YXJnZXRzOgogICAgLSAxNzIuMTYuMC44OjkxMDMK,' contrib/kube-prometheus/collectd-exporter/collectd-exporter-additional-scrape-configs.yaml
+	perl -pi -e 's,UPDATE-ME,    - 172.16.0.8:9103,' contrib/kube-prometheus/collectd-exporter/collectd-exporter-additional.yaml
+	perl -pi -e 's,UPDATE-ME,    service.beta.kubernetes.io/alicloud-loadbalancer-address-type: intranet,' contrib/kube-prometheus/manifests/collectd-exporter-http-service.yaml
+	perl -pi -e 's,UPDATE-ME,    service.beta.kubernetes.io/alicloud-loadbalancer-address-type: intranet,' contrib/kube-prometheus/manifests/collectd-exporter-service.yaml
+
 .PHONY: install-0
 install-0:
+	@echo "$${BOLD}# ***** GKE ***** ONLY ***** $${RESET}"
 	@echo "$${BOLD}# kubectl create clusterrolebinding cluster-admin-binding --clusterrole cluster-admin --user [USER_ACCOUNT]$${RESET}"
 	@echo
 	KUBECONFIG=$(KUBECONFIG) kubectl apply -f contrib/kube-prometheus/manifests/00namespace-namespace.yaml
