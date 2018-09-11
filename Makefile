@@ -37,6 +37,18 @@ clean:
 	@echo "$${BOLD}# now we're ready for: $${GREEN}make$${RESET}"
 	@echo
 
+.PHONY: prep-gke-no-collectd
+prep-gke-no-collectd:
+	perl -pi -e 's,UPDATE-ME,    cloud.google.com/load-balancer-type: Internal,' contrib/kube-prometheus/manifests/grafana-service.yaml
+	perl -pi -e 's,UPDATE-ME,    cloud.google.com/load-balancer-type: Internal,' contrib/kube-prometheus/manifests/prometheus-service.yaml
+	perl -pi -e 's,UPDATE-ME,  type: pd-ssd\nprovisioner: kubernetes.io/gce-pd,' contrib/kube-prometheus/manifests/prometheus-storageclass.yaml
+
+.PHONY: prep-acs-no-collectd
+prep-acs-no-collectd:
+	perl -pi -e 's,UPDATE-ME,    service.beta.kubernetes.io/alicloud-loadbalancer-address-type: intranet,' contrib/kube-prometheus/manifests/grafana-service.yaml
+	perl -pi -e 's,UPDATE-ME,    service.beta.kubernetes.io/alicloud-loadbalancer-address-type: intranet,' contrib/kube-prometheus/manifests/prometheus-service.yaml
+	perl -pi -e 's,UPDATE-ME,  type: cloud_ssd\nprovisioner: alicloud/disk,' contrib/kube-prometheus/manifests/prometheus-storageclass.yaml
+
 .PHONY: install-0
 install-0:
 	KUBECONFIG=$(KUBECONFIG) kubectl apply -f contrib/kube-prometheus/manifests/00namespace-namespace.yaml

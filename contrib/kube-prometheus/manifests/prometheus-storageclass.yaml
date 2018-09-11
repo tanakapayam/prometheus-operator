@@ -4,6 +4,5 @@ kind: StorageClass
 metadata:
   name: prometheus
 parameters:
-  type: pd-ssd
-provisioner: kubernetes.io/gce-pd
+UPDATE-ME
 reclaimPolicy: Retain
